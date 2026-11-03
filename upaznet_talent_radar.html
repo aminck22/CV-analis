@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upaznet Talent Radar — PT Dimensi Jaringan Bersinar</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React & ReactDOM UMD -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel Standalone for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0B132B;
+      color: #f1f5f9;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // SVG Icon Builder (Lucide-compatible inline SVG components)
+    const createIcon = (paths, viewBox = "0 0 24 24") => ({ className = "w-5 h-5", ...props }) => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox={viewBox}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+        {...props}
+      >
+        {paths}
+      </svg>
+    );
+
+    const Network = createIcon(<>
+      <rect x="16" y="16" width="6" height="6" rx="1" />
+      <rect x="2" y="16" width="6" height="6" rx="1" />
+      <rect x="9" y="2" width="6" height="6" rx="1" />
+      <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" />
+      <path d="M12 12V8" />
+    </>);
+
+    const Upload = createIcon(<>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" x2="12" y1="3" y2="15" />
+    </>);
+
+    const FileText = createIcon(<>
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      <line x1="10" x2="8" y1="9" y2="9" />
+      <line x1="16" x2="8" y1="13" y2="13" />
+      <line x1="16" x2="8" y1="17" y2="17" />
+    </>);
+
+    const ImageIcon = createIcon(<>
+      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+      <circle cx="9" cy="9" r="2" />
+      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+    </>);
+
+    const CheckCircle2 = createIcon(<>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m9 12 2 2 4-4" />
+    </>);
+
+    const AlertTriangle = createIcon(<>
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+    </>);
+
+    const XCircle = createIcon(<>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m15 9-6 6" />
+      <path d="m9 9 6 6" />
+    </>);
+
+    const Sparkles = createIcon(<>
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+      <path d="M5 3v4" />
+      <path d="M19 17v4" />
+      <path d="M3 5h4" />
+      <path d="M17 19h4" />
+    </>);
+
+    const Key = createIcon(<>
+      <circle cx="7.5" cy="15.5" r="5.5" />
+      <path d="m21 2-9.6 9.6" />
+      <path d="m15.5 7.5 3 3L22 7l-3-3" />
+    </>);
+
+    const Printer = createIcon(<>
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+      <rect width="12" height="8" x="6" y="14" />
+    </>);
+
+    const RefreshCw = createIcon(<>
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M8 16H3v5" />
+    </>);
+
+    const ChevronRight = createIcon(<>
+      <path d="m9 18 6-6-6-6" />
+    </>);
+
+    const Briefcase = createIcon(<>
+      <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </>);
+
+    const Award = createIcon(<>
+      <circle cx="12" cy="8" r="6" />
+      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+    </>);
+
+    const ShieldAlert = createIcon(<>
+      <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </>);
+
+    const MessageSquare = createIcon(<>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </>);
+
+    const ClipboardCheck = createIcon(<>
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <path d="m9 14 2 2 4-4" />
+    </>);
+
+    const User = createIcon(<>
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </>);
+
+    const Building2 = createIcon(<>
+      <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+      <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+      <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+      <path d="M10 6h4" />
+      <path d="M10 10h4" />
+      <path d="M10 14h4" />
+      <path d="M10 18h4" />
+    </>);
+
+    const Star = createIcon(<>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </>);
+
+    const Trash2 = createIcon(<>
+      <path d="M3 6h18" />
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+      <line x1="10" x2="10" y1="11" y2="17" />
+      <line x1="14" x2="14" y1="11" y2="17" />
+    </>);
+
+    const Edit3 = createIcon(<>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </>);
+
+    const Check = createIcon(<>
+      <path d="M20 6 9 17l-5-5" />
+    </>);
+
+    const Download = createIcon(<>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" x2="12" y1="15" y2="3" />
+    </>);
+
+    const Info = createIcon(<>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-4" />
+      <path d="M12 8h.01" />
+    </>);
+
+    const Zap = createIcon(<>
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </>);
+
+    const Radio = createIcon(<>
+      <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+      <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" />
+      <circle cx="12" cy="12" r="2" />
+      <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" />
+      <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" />
+    </>);
+
+    const Globe = createIcon(<>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+      <path d="M2 12h20" />
+    </>);
+
+    const HelpCircle = createIcon(<>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <path d="M12 17h.01" />
+    </>);
+
+    const Eye = createIcon(<>
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </>);
+
+    const EyeOff = createIcon(<>
+      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+      <line x1="2" x2="22" y1="2" y2="22" />
+    </>);
+
+    const FileUp = createIcon(<>
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      <path d="M12 12v6" />
+      <path d="m15 15-3-3-3 3" />
+    </>);
+
+    const Layers = createIcon(<>
+      <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+    </>);
+
+    const PhoneCall = createIcon(<>
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+      <path d="M14.05 2a9 9 0 0 1 8 7.94" />
+      <path d="M14.05 6A5 5 0 0 1 18 10" />
+    </>);
+
+    const Wrench = createIcon(<>
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    </>);
+
+    const Cpu = createIcon(<>
+      <rect width="16" height="16" x="4" y="4" rx="2" />
+      <rect width="6" height="6" x="9" y="9" rx="1" />
+      <path d="M15 2v2" />
+      <path d="M15 20v2" />
+      <path d="M2 15h2" />
+      <path d="M2 9h2" />
+      <path d="M20 15h2" />
+      <path d="M20 9h2" />
+      <path d="M9 2v2" />
+      <path d="M9 20v2" />
+    </>);
+
+// ==========================================
+// DATA PRESET POSISI ISP (UPAZNET / METARA)
+// ==========================================
+const ISP_PRESETS = {
+  ftth: {
+    id: 'ftth',
+    title: 'Teknisi FTTH / Jointer / IKR',
+    unit: 'upaznet Infrastructure',
+    icon: Wrench,
+    criteria: `1. Menguasai instalasi jaringan Fiber To The Home (FTTH), penarikan kabel dropcore, dan pemasangan perangkat ONT/ONU di lokasi pelanggan.
+2. Terampil menggunakan alat kerja fiber optik: Fusion Splicer, Optical Power Meter (OPM), Optical Time-Domain Reflectometer (OTDR), dan Visual Fault Locator (VFL).
+3. Memahami topologi jaringan pasif optik (OLT, ODC, ODP, Closure, Splitter) dan perhitungan redaman (dBm) sesuai standar ISP.
+4. Memahami dan mematuhi prosedur K3 (Keselamatan dan Kesehatan Kerja) terutama untuk pekerjaan di ketinggian (tiang tumpu/tangga).
+5. Siap bekerja di lapangan, sistem shift/on-call saat ada gangguan massal (backbone/distribusi putus), serta memiliki SIM C aktif.`
+  },
+  noc: {
+    id: 'noc',
+    title: 'Network Engineer / NOC',
+    unit: 'upaznet Core Network',
+    icon: Cpu,
+    criteria: `1. Menguasai konfigurasi dan manajemen perangkat Mikrotik (diutamakan memiliki sertifikasi MTCNA / MTCRE / MTCTCE) dan Cisco/Ruijie.
+2. Berpengalaman mengoperasikan dan melakukan provisioning OLT (ZTE, Huawei, HSGQ, atau C-Data) beserta manajemen GPON/EPON.
+3. Memahami konsep routing (Static, OSPF, BGP), manajemen bandwidth (QoS/Queue), VLAN, PPPoE, Failover, dan keamanan jaringan dasar.
+4. Terbiasa menggunakan tools monitoring jaringan seperti Zabbix, The Dude, Cacti, PRTG, atau LibreNMS untuk deteksi dini gangguan.
+5. Mampu melakukan analisa dan troubleshooting trafik jaringan secara cepat dan akurat serta berkoordinasi dengan tim teknisi lapangan.`
+  },
+  sales: {
+    id: 'sales',
+    title: 'Sales Executive / Canvasser Area',
+    unit: 'upaznet & METARA Expansion',
+    icon: Globe,
+    criteria: `1. Berpengalaman dalam penjualan langsung (Direct Selling / Door-to-Door / Canvassing) produk internet ritel (Home Broadband) maupun SOHO/Korporat.
+2. Memiliki kemampuan komunikasi persuasif, negosiasi, dan presentasi produk yang baik kepada calon pelanggan maupun tokoh masyarakat/RT/RW.
+3. Terbiasa bekerja dengan target akuisisi pelanggan harian/bulanan di area ekspansi baru (perumahan, desa, atau klaster).
+4. Menguasai wilayah lokal dengan baik, mampu memetakan potensi pasar serta aktivitas kompetitor ISP di lapangan.
+5. Memiliki kendaraan pribadi, SIM C, mentalitas tangguh, jujur, dan berorientasi pada kepuasan pelanggan.`
+  },
+  cs: {
+    id: 'cs',
+    title: 'Customer Service / Admin Billing',
+    unit: 'upaznet Care & Billing',
+    icon: PhoneCall,
+    criteria: `1. Mampu menangani keluhan pelanggan (komplain koneksi lambat, indikator LOS merah, atau tagihan) dengan empati, sabar, dan solutif melalui WhatsApp/Telepon.
+2. Memahami alur dasar troubleshooting jaringan tingkat pertama (First Level Handling) seperti cek redaman dari sistem OLT, restart ONT, dan pembacaan status modem.
+3. Teliti dalam pengelolaan administrasi pelanggan, manajemen tiket gangguan (ticketing system), dan eskalasi masalah ke tim NOC/Teknisi.
+4. Menguasai Ms. Excel / Google Sheets untuk rekonsiliasi pembayaran langganan bulanan, pembuatan invoice, dan pengingat jatuh tempo (billing).
+5. Komunikatif, rapi dalam dokumentasi data, dan siap bekerja dalam sistem shift.`
+  },
+  custom: {
+    id: 'custom',
+    title: 'Custom Role (Ketik Manual)',
+    unit: 'PT Dimensi Jaringan Bersinar',
+    icon: Briefcase,
+    criteria: ''
+  }
+};
+
+// ==========================================
+// DATA CONTOH CV (UNTUK DEMO CEPAT)
+// ==========================================
+const SAMPLE_CV_TEXT = `DAFTAR RIWAYAT HIDUP (CV)
+Nama Lengkap: Rizky Pratama Saputra
+Domisili: Jawa Timur
+Pendidikan: SMK Teknik Komputer dan Jaringan (Lulus 2021)
+
+RINGKASAN PROFIL
+Lulusan SMK TKJ dengan pengalaman kerja di bidang jaringan internet dan pelayanan teknis. Terbiasa bekerja di lapangan maupun di depan komputer. Jujur, pekerja keras, dan cepat belajar hal baru.
+
+PENGALAMAN KERJA:
+1. Teknisi Pasang Baru (PSB) - PT Cepat Konek Nusantara (Mitra ISP)
+   Periode: Januari 2024 - Mei 2024 (5 Bulan)
+   Deskripsi:
+   - Melakukan penarikan kabel fiber optik dropcore dari tiang ODP ke rumah pelanggan.
+   - Splicing kabel FO menggunakan fusion splicer dan cek redaman dengan OPM (standar maksimal -22 dBm).
+   - Setting dasar modem ONT ZTE dan Huawei (ganti nama WiFi dan password).
+
+2. Barista & Kasir - Kopi Senja Abadi
+   Periode: Juni 2023 - Desember 2023 (7 Bulan)
+   Deskripsi:
+   - Melayani pesanan pelanggan dan rekap kas harian.
+
+3. Teknisi Jaringan Magang / Helper - CV Media Net Mandiri (RT/RW Net & ISP Lokal)
+   Periode: Agustus 2021 - Maret 2022 (8 Bulan)
+   Deskripsi:
+   - Membantu teknisi senior menarik kabel LAN dan Fiber Optik.
+   - Belajar crimping kabel UTP, pasang konektor Fast Connector FO, dan setting router TP-Link / Totolink.
+   - Ikut serta dalam perbaikan kabel putus saat hujan angin.
+
+KEAHLIAN (SKILLS):
+- Splicing Fiber Optik (Fusion Splicer & Fast Connector)
+- Alat Ukur: OPM, VFL (Senter Laser), OTDR (bisa baca jarak putus dasar)
+- Konfigurasi Mikrotik (Winbox: DHCP, PPPoE Server, Simple Queue, Hotspot dasar)
+- Panjat tiang menggunakan tangga teleskopik dan safety belt
+- Memiliki SIM C dan motor pribadi.`;
+
+// ==========================================
+// SYSTEM PROMPT & JSON SCHEMA GEMINI
+// ==========================================
+const SYSTEM_INSTRUCTION = `Kamu adalah HR Director & Technical Recruiter Senior di PT Dimensi Jaringan Bersinar (upaznet), perusahaan Internet Service Provider (ISP). Tugasmu adalah membedah CV kandidat secara objektif, tajam, dan berbasis data. Evaluasi apakah riwayat pendidikan dan pengalaman kandidat LINIER dengan posisi yang dilamar. Temukan nilai plus, nilai minus, serta potensi red flag (seperti job hopping, gap tahun kosong, atau ketidaksesuaian klaim). Buat daftar pertanyaan interview yang spesifik merujuk pada isi CV kandidat tersebut (sebutkan nama perusahaan lama atau skill yang mereka tulis di CV dalam pertanyaanmu), beserta panduan jawaban idealnya.`;
+
+const RESPONSE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    candidateName: { type: "STRING", description: "Nama lengkap kandidat yang tertera di CV" },
+    candidateContact: { type: "STRING", description: "Domisili, email, atau nomor kontak singkat jika ada" },
+    lastEducation: { type: "STRING", description: "Pendidikan terakhir dan jurusan kandidat" },
+    matchScore: { type: "INTEGER", description: "Skor kecocokan total dalam skala 0 hingga 100" },
+    linearityStatus: {
+      type: "STRING",
+      enum: [
+        "Sangat Linier",
+        "Semi-Linier / Career Switcher Potensial",
+        "Tidak Linier"
+      ],
+      description: "Status linieritas pendidikan dan pengalaman kerja terhadap posisi yang dilamar"
+    },
+    executiveSummary: {
+      type: "STRING",
+      description: "Ringkasan eksekutif 2-3 kalimat padat mengenai profil kandidat dan kecocokan budaya kerja lapangan/kantor ISP upaznet"
+    },
+    strengths: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "Daftar nilai plus (Strengths): Keunggulan kandidat, sertifikasi relevan, durasi kerja stabil, pencapaian terukur"
+    },
+    weaknesses: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "Daftar nilai minus (Gaps/Weaknesses): Kurangnya skill teknis tertentu, minim pengalaman ISP, atau gap kompetensi yang perlu training"
+    },
+    redFlags: {
+      type: "ARRAY",
+      items: { type: "STRING" },
+      description: "Daftar indikasi / Red Flags: Kutu loncat (< 6 bulan), employment gap lama tanpa penjelasan, inkonsistensi kronologi tahun, atau klaim berlebihan"
+    },
+    interviewQuestions: {
+      type: "OBJECT",
+      properties: {
+        linearityVerification: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              question: { type: "STRING" },
+              idealAnswerIndicator: { type: "STRING" }
+            },
+            required: ["question", "idealAnswerIndicator"]
+          }
+        },
+        technicalCaseStudy: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              question: { type: "STRING" },
+              idealAnswerIndicator: { type: "STRING" }
+            },
+            required: ["question", "idealAnswerIndicator"]
+          }
+        },
+        redFlagConfirmation: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              question: { type: "STRING" },
+              idealAnswerIndicator: { type: "STRING" }
+            },
+            required: ["question", "idealAnswerIndicator"]
+          }
+        },
+        attitudeAndMental: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              question: { type: "STRING" },
+              idealAnswerIndicator: { type: "STRING" }
+            },
+            required: ["question", "idealAnswerIndicator"]
+          }
+        }
+      },
+      required: [
+        "linearityVerification",
+        "technicalCaseStudy",
+        "redFlagConfirmation",
+        "attitudeAndMental"
+      ]
+    }
+  },
+  required: [
+    "candidateName",
+    "matchScore",
+    "linearityStatus",
+    "executiveSummary",
+    "strengths",
+    "weaknesses",
+    "redFlags",
+    "interviewQuestions"
+  ]
+};
+
+function App() {
+  // ==========================================
+  // STATE MANAGEMENT
+  // ==========================================
+  // Branding & API Key State
+  const [customLogo, setCustomLogo] = useState(null);
+  const [userApiKey, setUserApiKey] = useState('');
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gemini-2.5-flash');
+
+  // Role & Job Configuration State
+  const [selectedPreset, setSelectedPreset] = useState('ftth');
+  const [customRoleTitle, setCustomRoleTitle] = useState('');
+  const [jobCriteria, setJobCriteria] = useState(ISP_PRESETS.ftth.criteria);
+  const [targetBrandUnit, setTargetBrandUnit] = useState('upaznet (Main ISP)');
+
+  // CV Upload State
+  const [inputMode, setInputMode] = useState('file'); // 'file' | 'text'
+  const [uploadedFile, setUploadedFile] = useState(null); // { name, mimeType, base64, size, previewUrl }
+  const [cvText, setCvText] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+
+  // AI Analysis & Loading State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [analysisResult, setAnalysisResult] = useState(null);
+
+  // Interview Evaluation & HR Notes State
+  const [activeInterviewTab, setActiveInterviewTab] = useState('linearityVerification');
+  const [interviewEval, setInterviewEval] = useState({});
+  const [hrSummaryNotes, setHrSummaryNotes] = useState('');
+  const [interviewerName, setInterviewerName] = useState('');
+  const [interviewRecommendation, setInterviewRecommendation] = useState('Dipertimbangkan');
+
+  // Refs
+  const logoInputRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const resultSectionRef = useRef(null);
+
+  // ==========================================
+  // INITIALIZATION & LOCALSTORAGE
+  // ==========================================
+  useEffect(() => {
+    try {
+      const savedLogo = localStorage.getItem('upaznet_company_logo');
+      if (savedLogo) setCustomLogo(savedLogo);
+
+      const savedKey = localStorage.getItem('upaznet_gemini_api_key');
+      if (savedKey) setUserApiKey(savedKey);
+
+      const savedInterviewer = localStorage.getItem('upaznet_interviewer_name');
+      if (savedInterviewer) setInterviewerName(savedInterviewer);
+    } catch (e) {
+      console.error('Gagal mengakses localStorage:', e);
+    }
+  }, []);
+
+  const handleSaveApiKey = (val) => {
+    setUserApiKey(val);
+    try {
+      localStorage.setItem('upaznet_gemini_api_key', val);
+    } catch (e) {
+      console.error('Gagal menyimpan API Key:', e);
+    }
+  };
+
+  const handleInterviewerChange = (val) => {
+    setInterviewerName(val);
+    try {
+      localStorage.setItem('upaznet_interviewer_name', val);
+    } catch (e) {
+      console.error('Gagal menyimpan nama pewawancara:', e);
+    }
+  };
+
+  // ==========================================
+  // HANDLERS: LOGO CUSTOMIZATION
+  // ==========================================
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErrorMsg('Format file logo harus berupa gambar (.png, .jpg, atau .svg).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      setCustomLogo(dataUrl);
+      try {
+        localStorage.setItem('upaznet_company_logo', dataUrl);
+      } catch (err) {
+        setErrorMsg('Ukuran gambar logo terlalu besar untuk disimpan di browser.');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleResetLogo = () => {
+    setCustomLogo(null);
+    try {
+      localStorage.removeItem('upaznet_company_logo');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // ==========================================
+  // HANDLERS: PRESET POSISI ISP
+  // ==========================================
+  const handlePresetChange = (presetKey) => {
+    setSelectedPreset(presetKey);
+    if (presetKey !== 'custom') {
+      setJobCriteria(ISP_PRESETS[presetKey].criteria);
+    } else {
+      setJobCriteria('');
+    }
+  };
+
+  const getActiveRoleTitle = () => {
+    if (selectedPreset === 'custom') {
+      return customRoleTitle.trim() || 'Posisi Kustom ISP';
+    }
+    return ISP_PRESETS[selectedPreset].title;
+  };
+
+  // ==========================================
+  // HANDLERS: CV UPLOAD & DRAG-DROP
+  // ==========================================
+  const processSelectedFile = (file) => {
+    setErrorMsg(null);
+    if (!file) return;
+
+    const validTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setErrorMsg('Format file tidak didukung. Harap unggah file PDF, JPG, atau PNG.');
+      return;
+    }
+
+    if (file.size > 12 * 1024 * 1024) {
+      setErrorMsg('Ukuran file maksimal adalah 12 MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const resultStr = reader.result;
+      const base64Data = resultStr.split(',')[1];
+      setUploadedFile({
+        name: file.name,
+        mimeType: file.type,
+        base64: base64Data,
+        size: (file.size / 1024).toFixed(1) + ' KB',
+        previewUrl: file.type.startsWith('image/') ? resultStr : null
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      setInputMode('file');
+      processSelectedFile(file);
+    }
+  };
+
+  const loadSampleCV = () => {
+    setInputMode('text');
+    setCvText(SAMPLE_CV_TEXT);
+    setSelectedPreset('ftth');
+    setJobCriteria(ISP_PRESETS.ftth.criteria);
+    setErrorMsg(null);
+  };
+
+  // ==========================================
+  // GEMINI API CALL WITH EXPONENTIAL BACKOFF
+  // ==========================================
+  const callGeminiWithBackoff = async (payload, modelName, apiKeyToUse) => {
+    const delays = [1000, 2000, 4000];
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKeyToUse}`;
+
+    for (let attempt = 0; attempt <= delays.length; attempt++) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          const status = response.status;
+          // Jika model 2.5-flash tidak tersedia pada environment runtime tanpa key, fallback ke gemini-3-flash-preview
+          if ((status === 404 || status === 400) && modelName === 'gemini-2.5-flash' && !apiKeyToUse) {
+            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKeyToUse}`;
+            const fallbackRes = await fetch(fallbackUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            if (fallbackRes.ok) {
+              return await fallbackRes.json();
+            }
+          }
+          throw new Error(errData?.error?.message || `HTTP Error ${status}`);
+        }
+
+        return await response.json();
+      } catch (err) {
+        if (attempt === delays.length) {
+          throw err;
+        }
+        await new Promise((res) => setTimeout(res, delays[attempt]));
+      }
+    }
+  };
+
+  const handleAnalyzeCandidate = async () => {
+    setErrorMsg(null);
+
+    const roleTitle = getActiveRoleTitle();
+    if (!jobCriteria.trim()) {
+      setErrorMsg('Harap isi kriteria kualifikasi posisi terlebih dahulu.');
+      return;
+    }
+
+    if (inputMode === 'file' && !uploadedFile) {
+      setErrorMsg('Harap unggah file CV (PDF atau Gambar JPG/PNG) terlebih dahulu, atau gunakan tab Paste Teks.');
+      return;
+    }
+
+    if (inputMode === 'text' && !cvText.trim()) {
+      setErrorMsg('Harap tempelkan (paste) teks CV kandidat terlebih dahulu.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    try {
+      const promptText = `
+Lakukan analisis mendalam terhadap CV kandidat berikut untuk proses rekrutmen di **PT Dimensi Jaringan Bersinar (upaznet)** - Unit Bisnis: **${targetBrandUnit}**.
+
+### POSISI YANG DILAMAR:
+**${roleTitle}**
+
+### KRITERIA & KUALIFIKASI TEKNIS POSISI:
+${jobCriteria}
+
+### INSTRUKSI ANALISIS KHUSUS:
+1. Evaluasi secara tajam apakah latar belakang pendidikan dan riwayat pengalaman kerja kandidat LINIER dengan posisi **${roleTitle}** di industri Internet Service Provider (ISP).
+2. Periksa kronologi tahun bekerja/pendidikan di CV. Identifikasi apabila ada pola *job hopping* (pindah kerja di bawah 6 bulan), *employment gap* (jeda menganggur cukup lama tanpa keterangan), atau klaim keahlian yang tampak dilebih-lebihkan dibanding durasi kerjanya.
+3. Buat daftar pertanyaan interview dalam 4 kategori:
+   - **linearityVerification** (3-4 pertanyaan): Verifikasi pengalaman nyata kandidat dengan menyebut langsung nama perusahaan lama, jabatan, atau alat/skill yang tertulis di CV mereka.
+   - **technicalCaseStudy** (3-4 pertanyaan): Studi kasus lapangan/teknis nyata sesuai posisi **${roleTitle}** di ISP upaznet (misalnya: analisa redaman tinggi di ODP, penanganan LOS massal, konfigurasi Mikrotik/OLT, strategi penetrasi sales area baru, atau penanganan pelanggan komplain di jam sibuk).
+   - **redFlagConfirmation** (3 pertanyaan): Pertanyaan tajam namun tetap profesional dan sopan untuk mengonfirmasi kekurangan skill, alasan pindah kerja cepat, atau jeda karir pada CV kandidat.
+   - **attitudeAndMental** (3 pertanyaan): Menguji integritas, kejujuran, kesiapan kerja tim/shift/lapangan, serta loyalitas kerja.
+4. Setiap pertanyaan wajib dilengkapi dengan **idealAnswerIndicator** yang konkret sebagai panduan penilaian HR/User Interviewer.
+      `.trim();
+
+      const parts = [{ text: promptText }];
+
+      if (inputMode === 'file' && uploadedFile) {
+        parts.push({
+          inlineData: {
+            mimeType: uploadedFile.mimeType,
+            data: uploadedFile.base64
+          }
+        });
+      } else {
+        parts.push({
+          text: `\n\n=== ISI TEKS CV KANDIDAT ===\n${cvText}`
+        });
+      }
+
+      const payload = {
+        contents: [{ role: 'user', parts }],
+        systemInstruction: {
+          parts: [{ text: SYSTEM_INSTRUCTION }]
+        },
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: RESPONSE_SCHEMA,
+          temperature: 0.25
+        }
+      };
+
+      const apiKey = userApiKey.trim() || "";
+      const result = await callGeminiWithBackoff(payload, selectedModel, apiKey);
+
+      const rawJsonText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawJsonText) {
+        throw new Error('Respons dari Gemini AI kosong atau tidak valid.');
+      }
+
+      const parsedData = JSON.parse(rawJsonText);
+      setAnalysisResult(parsedData);
+
+      // Inisialisasi state penilaian interview untuk tiap pertanyaan
+      const initialEval = {};
+      const categories = [
+        'linearityVerification',
+        'technicalCaseStudy',
+        'redFlagConfirmation',
+        'attitudeAndMental'
+      ];
+      categories.forEach((cat) => {
+        const list = parsedData.interviewQuestions?.[cat] || [];
+        list.forEach((_, idx) => {
+          initialEval[`${cat}_${idx}`] = {
+            checked: false,
+            score: 0,
+            note: ''
+          };
+        });
+      });
+      setInterviewEval(initialEval);
+      setActiveInterviewTab('linearityVerification');
+
+      setTimeout(() => {
+        resultSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+    } catch (err) {
+      console.error('Analysis Error:', err);
+      setErrorMsg(
+        `Gagal menganalisis CV: ${err.message || 'Terjadi kesalahan koneksi ke Gemini API. Pastikan API Key valid atau file tidak rusak.'}`
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // ==========================================
+  // HANDLERS: INTERVIEW EVALUATION TRACKER
+  // ==========================================
+  const updateQuestionEval = (key, field, value) => {
+    setInterviewEval((prev) => ({
+      ...prev,
+      [key]: {
+        ...(prev[key] || { checked: false, score: 0, note: '' }),
+        [field]: value
+      }
+    }));
+  };
+
+  const calculateInterviewStats = () => {
+    const entries = Object.values(interviewEval);
+    const totalQuestions = entries.length;
+    const checkedCount = entries.filter((e) => e.checked).length;
+    const scoredEntries = entries.filter((e) => e.score > 0);
+    const avgScore =
+      scoredEntries.length > 0
+        ? (scoredEntries.reduce((acc, curr) => acc + Number(curr.score), 0) / scoredEntries.length).toFixed(1)
+        : '0.0';
+
+    return { totalQuestions, checkedCount, scoredCount: scoredEntries.length, avgScore };
+  };
+
+  const interviewStats = calculateInterviewStats();
+
+  // ==========================================
+  // UI HELPERS (COLORS & BADGES)
+  // ==========================================
+  const getScoreColorConfig = (score) => {
+    if (score >= 78) {
+      return {
+        barBg: 'bg-[#10B981]',
+        textColor: 'text-[#10B981]',
+        borderColor: 'border-[#10B981]/40',
+        badgeBg: 'bg-[#10B981]/15 text-[#10B981]',
+        label: 'Sangat Direkomendasikan'
+      };
+    }
+    if (score >= 55) {
+      return {
+        barBg: 'bg-[#F59E0B]',
+        textColor: 'text-[#F59E0B]',
+        borderColor: 'border-[#F59E0B]/40',
+        badgeBg: 'bg-[#F59E0B]/15 text-[#F59E0B]',
+        label: 'Potensial dengan Catatan'
+      };
+    }
+    return {
+      barBg: 'bg-[#EF4444]',
+      textColor: 'text-[#EF4444]',
+      borderColor: 'border-[#EF4444]/40',
+      badgeBg: 'bg-[#EF4444]/15 text-[#EF4444]',
+      label: 'Kurang Sesuai Kualifikasi'
+    };
+  };
+
+  const getLinearityBadgeStyle = (status) => {
+    if (status === 'Sangat Linier') {
+      return 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/50';
+    }
+    if (status?.includes('Semi-Linier')) {
+      return 'bg-[#F59E0B]/20 text-[#F59E0B] border-[#F59E0B]/50';
+    }
+    return 'bg-[#EF4444]/20 text-[#EF4444] border-[#EF4444]/50';
+  };
+
+  const INTERVIEW_TABS = [
+    {
+      id: 'linearityVerification',
+      label: '1. Verifikasi Linieritas & Pengalaman',
+      shortLabel: 'Verifikasi CV',
+      icon: FileText,
+      desc: 'Menguji apakah klaim pengalaman dan keahlian di CV benar-benar dikerjakan sendiri oleh kandidat.'
+    },
+    {
+      id: 'technicalCaseStudy',
+      label: '2. Uji Teknis & Studi Kasus Lapangan',
+      shortLabel: 'Uji Teknis & Kasus',
+      icon: Wrench,
+      desc: 'Pertanyaan skenario nyata operasional ISP sesuai posisi yang dilamar.'
+    },
+    {
+      id: 'redFlagConfirmation',
+      label: '3. Konfirmasi Minus & Red Flag',
+      shortLabel: 'Konfirmasi Red Flag',
+      icon: ShieldAlert,
+      desc: 'Pertanyaan tajam namun sopan untuk mengonfirmasi jeda karir, perpindahan kerja cepat, atau gap kompetensi.'
+    },
+    {
+      id: 'attitudeAndMental',
+      label: '4. Attitude, Loyalitas & Mentalitas',
+      shortLabel: 'Attitude & Mental',
+      icon: Award,
+      desc: 'Menguji kejujuran, kesiapan kerja tim/shift/lapangan, serta integritas kandidat.'
+    }
+  ];
+
+  const handlePrintReport = () => {
+    window.print();
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0B132B] text-slate-100 font-sans selection:bg-[#00A8E8] selection:text-white">
+      {/* ==========================================
+          PRINT STYLES (OPTIMASI CETAK / PDF LAPORAN HR)
+      ========================================== */}
+      <style>{`
+        @media print {
+          body {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .print-only {
+            display: block !important;
+          }
+          .print-card {
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            color: #0f172a !important;
+            box-shadow: none !important;
+            break-inside: avoid;
+          }
+          .print-text-dark {
+            color: #0f172a !important;
+          }
+          .print-text-muted {
+            color: #475569 !important;
+          }
+        }
+      `}</style>
+
+      {/* ==========================================
+          TOP NAVBAR (BRANDING & CUSTOM LOGO + API KEY)
+      ========================================== */}
+      <header className="sticky top-0 z-40 bg-[#0B132B]/95 backdrop-blur-md border-b border-slate-800/80 shadow-lg no-print">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            
+            {/* Left: Logo + Company Name + Ubah Logo Button */}
+            <div className="flex items-center justify-between sm:justify-start gap-3">
+              <div className="flex items-center gap-3.5">
+                {/* Area Logo */}
+                <div className="relative group flex-shrink-0">
+                  {customLogo ? (
+                    <div className="w-12 h-12 rounded-xl bg-slate-900/90 border border-[#00A8E8]/50 flex items-center justify-center overflow-hidden p-1 shadow-inner">
+                      <img
+                        src={customLogo}
+                        alt="Logo PT Dimensi Jaringan Bersinar"
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+                  ) : (
+                    /* Placeholder SVG bertema Fiber Optic / Konektivitas Jaringan */
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#00A8E8] via-[#0284c7] to-[#0B132B] p-0.5 shadow-lg shadow-[#00A8E8]/20">
+                      <div className="w-full h-full bg-[#0B132B] rounded-[10px] flex items-center justify-center relative overflow-hidden">
+                        <svg
+                          viewBox="0 0 48 48"
+                          className="w-8 h-8 text-[#00A8E8]"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <circle cx="24" cy="24" r="18" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 3" className="opacity-50" />
+                          <path d="M12 32C16 24 22 20 36 16" stroke="#00A8E8" strokeWidth="2.5" strokeLinecap="round" />
+                          <path d="M12 24C18 24 26 26 36 32" stroke="#10B981" strokeWidth="2" strokeLinecap="round" />
+                          <path d="M16 14C22 20 26 24 34 24" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round" />
+                          <circle cx="36" cy="16" r="3.5" fill="#00A8E8" />
+                          <circle cx="36" cy="32" r="3" fill="#10B981" />
+                          <circle cx="34" cy="24" r="2.5" fill="#38bdf8" />
+                          <circle cx="12" cy="32" r="2.5" fill="#00A8E8" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Brand Identity Text */}
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xl font-extrabold tracking-tight text-white">
+                      upaz<span className="text-[#00A8E8]">net</span>
+                    </span>
+                    <span className="text-slate-600 font-light">|</span>
+                    <span className="text-sm font-semibold text-slate-200">
+                      PT Dimensi Jaringan Bersinar
+                    </span>
+                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-[#00A8E8]/15 text-[#00A8E8] border border-[#00A8E8]/30">
+                      METARA Expansion
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+                    <Radio className="w-3.5 h-3.5 text-[#10B981] animate-pulse" />
+                    <span>Upaznet Talent Radar — <em>HR Intelligence & Candidate Screening Portal</em></span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Tombol Ubah Logo */}
+              <div className="flex items-center gap-1.5 ml-2">
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.svg,image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  title="Unggah logo perusahaan (.png/.jpg/.svg)"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer shadow-sm"
+                >
+                  <Upload className="w-3.5 h-3.5 text-[#00A8E8]" />
+                  <span>Ubah Logo</span>
+                </button>
+                {customLogo && (
+                  <button
+                    type="button"
+                    onClick={handleResetLogo}
+                    title="Kembalikan ke logo default"
+                    className="p-1.5 rounded-lg text-xs bg-slate-800/60 hover:bg-red-950/60 text-slate-400 hover:text-red-400 border border-slate-700/60 transition"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Gemini API Key Input & Model Selector */}
+            <div className="flex flex-wrap items-center gap-2.5 justify-end">
+              {/* Model Badge / Selector */}
+              <div className="flex items-center bg-slate-900/90 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-[#00A8E8] mr-1.5" />
+                <span className="text-slate-400 mr-1.5">Engine:</span>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer"
+                >
+                  <option value="gemini-2.5-flash" className="bg-[#0B132B] text-white">
+                    gemini-2.5-flash
+                  </option>
+                  <option value="gemini-3-flash-preview" className="bg-[#0B132B] text-white">
+                    gemini-3-flash-preview
+                  </option>
+                </select>
+              </div>
+
+              {/* API Key Input Box */}
+              <div className="relative flex items-center bg-slate-900/90 border border-slate-700/80 focus-within:border-[#00A8E8] rounded-lg px-3 py-1.5 w-full sm:w-64 transition">
+                <Key className="w-3.5 h-3.5 text-[#00A8E8] mr-2 flex-shrink-0" />
+                <input
+                  type={showApiKey ? 'text' : 'password'}
+                  value={userApiKey}
+                  onChange={(e) => handleSaveApiKey(e.target.value)}
+                  placeholder="Gemini API Key (Opsional di Preview)"
+                  className="bg-transparent text-xs text-slate-200 placeholder-slate-500 focus:outline-none w-full pr-6"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                  className="absolute right-2 text-slate-400 hover:text-slate-200"
+                  title={showApiKey ? 'Sembunyikan API Key' : 'Tampilkan API Key'}
+                >
+                  {showApiKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </header>
+
+      {/* ==========================================
+          MAIN CONTENT CONTAINER
+      ========================================== */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        
+        {/* HERO BANNER / STATUS BAR (NO-PRINT) */}
+        <div className="bg-gradient-to-r from-[#132043] via-[#111C38] to-[#0B132B] border border-[#00A8E8]/25 rounded-2xl p-5 shadow-xl relative overflow-hidden no-print">
+          <div className="absolute -right-10 -bottom-10 w-52 h-52 bg-[#00A8E8]/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#00A8E8]/15 border border-[#00A8E8]/30 text-[#00A8E8] text-xs font-semibold">
+                <Zap className="w-3.5 h-3.5" />
+                <span>AI-Powered ISP Recruitment System</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-white">
+                Sistem Screening CV & Generator Wawancara Terpadu
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-3xl">
+                Otomatisasi bedah linieritas kandidat, deteksi dini <em>red flag</em> (kutu loncat / jeda karir), serta pembuatan daftar pertanyaan teknis & lapangan khusus standar operasional <strong>upaznet</strong> dan <strong>METARA</strong>.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 self-start md:self-center">
+              <button
+                type="button"
+                onClick={loadSampleCV}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-[#00A8E8] border border-[#00A8E8]/30 transition shadow-sm cursor-pointer"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Muat Contoh CV Teknisi</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ==========================================
+            SECTION 1 & 2: KONFIGURASI LOWONGAN & UPLOAD CV (NO-PRINT)
+        ========================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 no-print">
+          
+          {/* PANEL KIRI (7 KOLOM): KONFIGURASI LOWONGAN ISP */}
+          <div className="lg:col-span-7 bg-[#111C38]/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#00A8E8]/15 border border-[#00A8E8]/30 flex items-center justify-center text-[#00A8E8]">
+                    <Briefcase className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white">
+                      1. Panel Konfigurasi Lowongan ISP
+                    </h2>
+                    <p className="text-xs text-slate-400">
+                      Pilih preset posisi di PT Dimensi Jaringan Bersinar atau sesuaikan kriteria
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                  Multi-Role ISP
+                </span>
+              </div>
+
+              {/* Pilihan Preset Posisi & Sub-Unit */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    Pilih Preset Posisi Lowongan:
+                  </label>
+                  <select
+                    value={selectedPreset}
+                    onChange={(e) => handlePresetChange(e.target.value)}
+                    className="w-full bg-[#0B132B] border border-slate-700 focus:border-[#00A8E8] rounded-xl px-3.5 py-2.5 text-sm text-white font-medium focus:outline-none transition"
+                  >
+                    <option value="ftth">🔧 Teknisi FTTH / Jointer / IKR</option>
+                    <option value="noc">🖧 Network Engineer / NOC</option>
+                    <option value="sales">🚀 Sales Executive / Canvasser Area</option>
+                    <option value="cs">🎧 Customer Service / Admin Billing</option>
+                    <option value="custom">✏️ Custom Role (Ketik Manual)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    Unit Penempatan:
+                  </label>
+                  <select
+                    value={targetBrandUnit}
+                    onChange={(e) => setTargetBrandUnit(e.target.value)}
+                    className="w-full bg-[#0B132B] border border-slate-700 focus:border-[#00A8E8] rounded-xl px-3 py-2.5 text-sm text-white font-medium focus:outline-none transition"
+                  >
+                    <option value="upaznet (Main ISP)">upaznet (Main ISP)</option>
+                    <option value="METARA (Sub-Unit Ekspansi)">METARA (Ekspansi)</option>
+                    <option value="PT Dimensi Jaringan Bersinar (HQ)">PT DJB (Head Office)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Quick Pill Selector Preset */}
+              <div className="flex flex-wrap gap-2">
+                {Object.values(ISP_PRESETS).map((preset) => {
+                  const IconComp = preset.icon;
+                  const isActive = selectedPreset === preset.id;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => handlePresetChange(preset.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition cursor-pointer ${
+                        isActive
+                          ? 'bg-[#00A8E8]/20 border-[#00A8E8] text-white shadow-sm shadow-[#00A8E8]/20'
+                          : 'bg-[#0B132B]/70 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                      }`}
+                    >
+                      <IconComp className={`w-3.5 h-3.5 ${isActive ? 'text-[#00A8E8]' : 'text-slate-500'}`} />
+                      <span>{preset.title.split('/')[0].trim()}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Input Nama Posisi Manual jika Custom Role dipilih */}
+              {selectedPreset === 'custom' && (
+                <div>
+                  <label className="block text-xs font-semibold text-[#00A8E8] mb-1.5">
+                    Nama Posisi / Jabatan Baru:
+                  </label>
+                  <input
+                    type="text"
+                    value={customRoleTitle}
+                    onChange={(e) => setCustomRoleTitle(e.target.value)}
+                    placeholder="Contoh: Koordinator Lapangan Osp / Drafter GIS FTTH / Finance"
+                    className="w-full bg-[#0B132B] border border-[#00A8E8]/50 focus:border-[#00A8E8] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none"
+                  />
+                </div>
+              )}
+
+              {/* Textarea Kriteria Teknis */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-300">
+                    Kriteria Teknis & Kualifikasi (Dapat Diedit Sesuai Kebutuhan):
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    Digunakan sebagai tolok ukur linieritas AI
+                  </span>
+                </div>
+                <textarea
+                  rows={6}
+                  value={jobCriteria}
+                  onChange={(e) => setJobCriteria(e.target.value)}
+                  placeholder="Tuliskan kualifikasi teknis, alat kerja yang wajib dikuasai, serta syarat mentalitas posisi ini..."
+                  className="w-full bg-[#0B132B] border border-slate-700 focus:border-[#00A8E8] rounded-xl p-3.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 leading-relaxed focus:outline-none resize-y"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+              <span>Posisi Aktif: <strong className="text-[#00A8E8]">{getActiveRoleTitle()}</strong></span>
+              <span>Unit: <strong className="text-slate-200">{targetBrandUnit}</strong></span>
+            </div>
+          </div>
+
+          {/* PANEL KANAN (5 KOLOM): MULTI-FORMAT CV UPLOADER */}
+          <div className="lg:col-span-5 bg-[#111C38]/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center text-[#10B981]">
+                    <FileUp className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold text-white">
+                      2. Multi-Format CV Uploader
+                    </h2>
+                    <p className="text-xs text-slate-400">
+                      Unggah PDF, Foto/Scan CV (JPG/PNG), atau Paste Teks
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Switch Mode: File Upload vs Paste Teks */}
+              <div className="grid grid-cols-2 gap-2 bg-[#0B132B] p-1 rounded-xl border border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setInputMode('file')}
+                  className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                    inputMode === 'file'
+                      ? 'bg-[#00A8E8] text-white shadow'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Upload PDF / Gambar</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode('text')}
+                  className={`flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                    inputMode === 'text'
+                      ? 'bg-[#00A8E8] text-white shadow'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Paste Teks CV</span>
+                </button>
+              </div>
+
+              {/* Area Input Berdasarkan Mode */}
+              {inputMode === 'file' ? (
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,image/jpeg,image/png,image/webp"
+                    onChange={(e) => processSelectedFile(e.target.files?.[0])}
+                    className="hidden"
+                  />
+
+                  {!uploadedFile ? (
+                    <div
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragging(true);
+                      }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-2xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center min-h-[210px] ${
+                        isDragging
+                          ? 'border-[#00A8E8] bg-[#00A8E8]/10'
+                          : 'border-slate-700 hover:border-[#00A8E8]/60 bg-[#0B132B]/70'
+                      }`}
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-[#00A8E8]/15 border border-[#00A8E8]/30 flex items-center justify-center text-[#00A8E8] mb-3">
+                        <Upload className="w-6 h-6" />
+                      </div>
+                      <p className="text-sm font-semibold text-white mb-1">
+                        Klik atau Seret File CV ke Area Ini
+                      </p>
+                      <p className="text-xs text-slate-400 max-w-xs">
+                        Mendukung dokumen <strong>PDF</strong> atau hasil foto/scan CV <strong>(JPG, PNG)</strong> hingga 12 MB.
+                      </p>
+                      <div className="flex items-center gap-3 mt-4 text-[11px] text-slate-400">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
+                          <FileText className="w-3 h-3 text-[#00A8E8]" /> PDF Multimodal
+                        </span>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
+                          <ImageIcon className="w-3 h-3 text-[#10B981]" /> OCR Foto/Scan CV
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-[#0B132B] border border-[#00A8E8]/40 rounded-2xl p-4 space-y-3 min-h-[210px] flex flex-col justify-between">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-xl bg-[#00A8E8]/20 text-[#00A8E8] flex items-center justify-center flex-shrink-0">
+                            {uploadedFile.mimeType === 'application/pdf' ? (
+                              <FileText className="w-5 h-5" />
+                            ) : (
+                              <ImageIcon className="w-5 h-5" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-bold text-white truncate">
+                              {uploadedFile.name}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {uploadedFile.mimeType} • {uploadedFile.size}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setUploadedFile(null)}
+                          className="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/70 text-red-400 border border-red-800/50 transition"
+                          title="Hapus file"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {uploadedFile.previewUrl ? (
+                        <div className="h-28 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center">
+                          <img
+                            src={uploadedFile.previewUrl}
+                            alt="Preview CV"
+                            className="max-h-full object-contain"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-28 rounded-xl bg-slate-900/70 border border-slate-800 flex flex-col items-center justify-center text-xs text-slate-300">
+                          <CheckCircle2 className="w-6 h-6 text-[#10B981] mb-1" />
+                          <span>Dokumen PDF siap dikirim ke Multimodal Gemini API</span>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full py-1.5 text-xs font-medium text-[#00A8E8] hover:underline"
+                      >
+                        Ganti dengan file CV lain
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <textarea
+                    rows={8}
+                    value={cvText}
+                    onChange={(e) => setCvText(e.target.value)}
+                    placeholder="Tempelkan (Paste) isi teks CV kandidat di sini: riwayat pendidikan, pengalaman kerja beserta bulan/tahun, dan keahlian..."
+                    className="w-full bg-[#0B132B] border border-slate-700 focus:border-[#00A8E8] rounded-xl p-3.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 leading-relaxed focus:outline-none resize-y min-h-[210px]"
+                  />
+                </div>
+              )}
+
+              {/* Pesan Error Validasi / API */}
+              {errorMsg && (
+                <div className="bg-[#EF4444]/15 border border-[#EF4444]/50 rounded-xl p-3 flex items-start gap-2.5 text-xs text-red-200">
+                  <AlertTriangle className="w-4 h-4 text-[#EF4444] flex-shrink-0 mt-0.5" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Tombol CTA Analisis Kandidat */}
+            <div className="mt-4 pt-3 border-t border-slate-800/80">
+              <button
+                type="button"
+                disabled={isAnalyzing}
+                onClick={handleAnalyzeCandidate}
+                className={`w-full py-3.5 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2.5 shadow-lg transition cursor-pointer ${
+                  isAnalyzing
+                    ? 'bg-slate-700 text-slate-300 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-[#00A8E8] to-[#0284c7] hover:from-[#0284c7] hover:to-[#0369a1] text-white shadow-[#00A8E8]/25'
+                }`}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin text-white" />
+                    <span>Menganalisis Linieritas & Membedah CV...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    <span>Analisis Kandidat & Buat Pertanyaan Interview</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ==========================================
+            LOADING SKELETON SAAT PROSES ANALISIS AI
+        ========================================== */}
+        {isAnalyzing && (
+          <div className="bg-[#111C38]/90 border border-[#00A8E8]/40 rounded-2xl p-8 text-center space-y-4 animate-pulse no-print">
+            <div className="w-14 h-14 rounded-2xl bg-[#00A8E8]/20 border border-[#00A8E8]/40 flex items-center justify-center mx-auto text-[#00A8E8]">
+              <RefreshCw className="w-7 h-7 animate-spin" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white">
+                Upaznet AI Talent Radar Sedang Membedah CV Kandidat...
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+                Mengevaluasi linieritas riwayat pendidikan & pekerjaan dengan posisi <strong>{getActiveRoleTitle()}</strong>, mendeteksi potensi <em>red flag</em>, serta menyusun pertanyaan interview berbasis isi CV.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* ==========================================
+            SECTION 3: OUTPUT ANALISIS AI (DASHBOARD TERSTRUKTUR)
+        ========================================== */}
+        {analysisResult && !isAnalyzing && (
+          <div ref={resultSectionRef} className="space-y-8 pt-2">
+            
+            {/* HEADER CETAK KHUSUS MODE PRINT/PDF */}
+            <div className="hidden print-only border-b-2 border-slate-800 pb-4 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {customLogo && (
+                    <img src={customLogo} alt="Logo" className="w-12 h-12 object-contain" />
+                  )}
+                  <div>
+                    <h1 className="text-xl font-extrabold text-slate-900">
+                      PT DIMENSI JARINGAN BERSINAR (upaznet | METARA)
+                    </h1>
+                    <p className="text-xs text-slate-600">
+                      Dokumen Resmi Hasil Screening CV & Evaluasi Interview Kandidat — Upaznet Talent Radar
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right text-xs text-slate-600">
+                  <p>Tanggal Cetak: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  <p>Unit: {targetBrandUnit}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* ACTION BAR HASIL ANALISIS (NO-PRINT) */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#111C38] border border-slate-800 rounded-2xl px-5 py-3.5 no-print">
+              <div className="flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full bg-[#10B981]" />
+                <span className="text-sm font-semibold text-white">
+                  Hasil Analisis Kandidat: <span className="text-[#00A8E8]">{analysisResult.candidateName}</span>
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  type="button"
+                  onClick={handlePrintReport}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#10B981] hover:bg-[#059669] text-slate-950 transition shadow-md cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Cetak / Simpan PDF Hasil Screening & Interview</span>
+                </button>
+              </div>
+            </div>
+
+            {/* ==========================================
+                A. KARTU SKOR & INDIKASI LINIERITAS (LINEARITY METER)
+            ========================================== */}
+            {(() => {
+              const scoreCfg = getScoreColorConfig(analysisResult.matchScore || 0);
+              return (
+                <div className="bg-[#111C38] border border-slate-800 rounded-2xl p-6 shadow-xl print-card">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    
+                    {/* Kolom Kiri: Skor Kecocokan Total & Linearity Meter */}
+                    <div className="lg:col-span-5 bg-[#0B132B] border border-slate-800/90 rounded-2xl p-5 space-y-4 print-card">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400 print-text-muted">
+                          Skor Kecocokan Total
+                        </span>
+                        <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${scoreCfg.badgeBg}`}>
+                          {scoreCfg.label}
+                        </span>
+                      </div>
+
+                      <div className="flex items-baseline gap-3">
+                        <span className={`text-5xl font-black tracking-tight ${scoreCfg.textColor}`}>
+                          {analysisResult.matchScore}%
+                        </span>
+                        <span className="text-xs text-slate-400 print-text-muted">
+                          terhadap kualifikasi <strong>{getActiveRoleTitle()}</strong>
+                        </span>
+                      </div>
+
+                      {/* Progress Bar Warna Dinamis */}
+                      <div className="w-full h-3.5 bg-slate-800 rounded-full overflow-hidden p-0.5">
+                        <div
+                          className={`h-full rounded-full transition-all duration-700 ${scoreCfg.barBg}`}
+                          style={{ width: `${Math.min(100, Math.max(0, analysisResult.matchScore || 0))}%` }}
+                        />
+                      </div>
+
+                      {/* Badge Status Linieritas */}
+                      <div className="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <span className="text-xs text-slate-400 print-text-muted">
+                          Indikasi Linieritas:
+                        </span>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border ${getLinearityBadgeStyle(
+                            analysisResult.linearityStatus
+                          )}`}
+                        >
+                          <Layers className="w-3.5 h-3.5" />
+                          <span>{analysisResult.linearityStatus}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Kolom Kanan: Profil Kandidat & Ringkasan Eksekutif */}
+                    <div className="lg:col-span-7 space-y-4">
+                      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-800 pb-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <User className="w-5 h-5 text-[#00A8E8]" />
+                            <h3 className="text-xl font-extrabold text-white print-text-dark">
+                              {analysisResult.candidateName}
+                            </h3>
+                          </div>
+                          <p className="text-xs text-slate-400 mt-1 print-text-muted">
+                            Pendidikan: <strong className="text-slate-200 print-text-dark">{analysisResult.lastEducation || '-'}</strong>
+                            {analysisResult.candidateContact ? ` • Kontak/Domisili: ${analysisResult.candidateContact}` : ''}
+                          </p>
+                        </div>
+
+                        <div className="bg-[#0B132B] border border-slate-800 rounded-xl px-3.5 py-2 text-right print-card">
+                          <p className="text-[11px] text-slate-400 print-text-muted">Posisi Dilamar</p>
+                          <p className="text-xs font-bold text-[#00A8E8] print-text-dark">
+                            {getActiveRoleTitle()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Executive Summary */}
+                      <div className="bg-[#0B132B]/70 border-l-4 border-[#00A8E8] rounded-r-xl p-4 space-y-1.5 print-card">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-[#00A8E8]">
+                          <Sparkles className="w-4 h-4" />
+                          <span>Ringkasan Eksekutif HR (Executive Summary)</span>
+                        </div>
+                        <p className="text-sm text-slate-200 leading-relaxed print-text-dark">
+                          {analysisResult.executiveSummary}
+                        </p>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* ==========================================
+                B. MATRIKS PLUS, MINUS & RED FLAG (3 KOLOM CARD)
+            ========================================== */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              {/* Kolom 1: Nilai Plus (Strengths) - Emerald Green (#10B981) */}
+              <div className="bg-[#111C38] border border-[#10B981]/30 rounded-2xl p-5 shadow-lg flex flex-col print-card">
+                <div className="flex items-center gap-2.5 pb-3.5 mb-4 border-b border-slate-800">
+                  <div className="w-9 h-9 rounded-xl bg-[#10B981]/15 text-[#10B981] flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#10B981]">
+                      Nilai Plus (Strengths)
+                    </h3>
+                    <p className="text-[11px] text-slate-400 print-text-muted">
+                      Keunggulan, skill relevan & pencapaian
+                    </p>
+                  </div>
+                </div>
+
+                <ul className="space-y-2.5 flex-1">
+                  {(analysisResult.strengths || []).map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200 print-text-dark">
+                      <span className="w-5 h-5 rounded-full bg-[#10B981]/20 text-[#10B981] flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                        +
+                      </span>
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Kolom 2: Nilai Minus (Gaps/Weaknesses) - Amber (#F59E0B) */}
+              <div className="bg-[#111C38] border border-[#F59E0B]/30 rounded-2xl p-5 shadow-lg flex flex-col print-card">
+                <div className="flex items-center gap-2.5 pb-3.5 mb-4 border-b border-slate-800">
+                  <div className="w-9 h-9 rounded-xl bg-[#F59E0B]/15 text-[#F59E0B] flex items-center justify-center flex-shrink-0">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#F59E0B]">
+                      Nilai Minus (Gaps / Weaknesses)
+                    </h3>
+                    <p className="text-[11px] text-slate-400 print-text-muted">
+                      Gap kompetensi teknis / butuh training
+                    </p>
+                  </div>
+                </div>
+
+                <ul className="space-y-2.5 flex-1">
+                  {(analysisResult.weaknesses || []).map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200 print-text-dark">
+                      <span className="w-5 h-5 rounded-full bg-[#F59E0B]/20 text-[#F59E0B] flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                        -
+                      </span>
+                      <span className="leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Kolom 3: Indikasi / Red Flags - Coral Red (#EF4444) */}
+              <div className="bg-[#111C38] border border-[#EF4444]/30 rounded-2xl p-5 shadow-lg flex flex-col print-card">
+                <div className="flex items-center gap-2.5 pb-3.5 mb-4 border-b border-slate-800">
+                  <div className="w-9 h-9 rounded-xl bg-[#EF4444]/15 text-[#EF4444] flex items-center justify-center flex-shrink-0">
+                    <ShieldAlert className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#EF4444]">
+                      Indikasi / Red Flags
+                    </h3>
+                    <p className="text-[11px] text-slate-400 print-text-muted">
+                      Job hopping, gap tahun kosong, inkonsistensi
+                    </p>
+                  </div>
+                </div>
+
+                <ul className="space-y-2.5 flex-1">
+                  {(analysisResult.redFlags || []).length > 0 ? (
+                    analysisResult.redFlags.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-slate-200 print-text-dark">
+                        <span className="w-5 h-5 rounded-full bg-[#EF4444]/20 text-[#EF4444] flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                          !
+                        </span>
+                        <span className="leading-relaxed">{item}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-xs text-slate-400 italic">
+                      Tidak ditemukan indikasi red flag mayor pada CV.
+                    </li>
+                  )}
+                </ul>
+              </div>
+
+            </div>
+
+            {/* ==========================================
+                C. GENERATOR PERTANYAAN INTERVIEW OTOMATIS & PENILAIAN HR
+            ========================================== */}
+            <div className="bg-[#111C38] border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-6 print-card">
+              
+              {/* Header Seksi Interview */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#00A8E8]/15 border border-[#00A8E8]/30 flex items-center justify-center text-[#00A8E8]">
+                    <MessageSquare className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white print-text-dark">
+                      Panduan Wawancara Kandidat & Lembar Skor HR
+                    </h3>
+                    <p className="text-xs text-slate-400 print-text-muted">
+                      Pertanyaan disusun spesifik berdasarkan isi CV <strong>{analysisResult.candidateName}</strong> beserta indikator jawaban ideal
+                    </p>
+                  </div>
+                </div>
+
+                {/* Live Skor Wawancara Summary */}
+                <div className="flex flex-wrap items-center gap-3 bg-[#0B132B] border border-slate-800 rounded-xl px-4 py-2.5 print-card">
+                  <div className="text-xs">
+                    <span className="text-slate-400 print-text-muted">Pertanyaan Ditanyakan: </span>
+                    <strong className="text-white print-text-dark">
+                      {interviewStats.checkedCount} / {interviewStats.totalQuestions}
+                    </strong>
+                  </div>
+                  <span className="text-slate-700">|</span>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <Star className="w-4 h-4 text-[#F59E0B] fill-[#F59E0B]" />
+                    <span className="text-slate-400 print-text-muted">Rata-rata Skor Interview: </span>
+                    <strong className="text-[#00A8E8] text-sm">
+                      {interviewStats.avgScore} / 5.0
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Navigasi 4 Tab Kategori Pertanyaan (No-Print) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 no-print">
+                {INTERVIEW_TABS.map((tab) => {
+                  const IconComp = tab.icon;
+                  const isActive = activeInterviewTab === tab.id;
+                  const questionsInTab = analysisResult.interviewQuestions?.[tab.id] || [];
+                  const answeredInTab = questionsInTab.filter(
+                    (_, idx) => interviewEval[`${tab.id}_${idx}`]?.checked
+                  ).length;
+
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveInterviewTab(tab.id)}
+                      className={`p-3.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-2 ${
+                        isActive
+                          ? 'bg-[#00A8E8]/15 border-[#00A8E8] text-white shadow-md'
+                          : 'bg-[#0B132B]/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <IconComp className={`w-4 h-4 ${isActive ? 'text-[#00A8E8]' : 'text-slate-500'}`} />
+                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                          {answeredInTab}/{questionsInTab.length}
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold leading-snug">{tab.label}</p>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Daftar Pertanyaan pada Tab Aktif (Interaktif di Layar) */}
+              <div className="space-y-4 no-print">
+                {INTERVIEW_TABS.filter((t) => t.id === activeInterviewTab).map((activeTabObj) => {
+                  const list = analysisResult.interviewQuestions?.[activeTabObj.id] || [];
+                  return (
+                    <div key={activeTabObj.id} className="space-y-4">
+                      <div className="bg-[#0B132B]/60 border border-slate-800/80 rounded-xl px-4 py-2.5 flex items-center justify-between">
+                        <span className="text-xs text-slate-300">{activeTabObj.desc}</span>
+                      </div>
+
+                      {list.map((qItem, idx) => {
+                        const evalKey = `${activeTabObj.id}_${idx}`;
+                        const currentEval = interviewEval[evalKey] || {
+                          checked: false,
+                          score: 0,
+                          note: ''
+                        };
+
+                        return (
+                          <div
+                            key={evalKey}
+                            className={`rounded-2xl border p-5 transition ${
+                              currentEval.checked
+                                ? 'bg-[#0B132B] border-[#10B981]/50'
+                                : 'bg-[#0B132B]/90 border-slate-800'
+                            }`}
+                          >
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                              
+                              {/* Kiri (7 Kolom): Pertanyaan & Indikator Jawaban Ideal */}
+                              <div className="lg:col-span-7 space-y-3">
+                                <div className="flex items-start gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      updateQuestionEval(evalKey, 'checked', !currentEval.checked)
+                                    }
+                                    className={`mt-0.5 w-6 h-6 rounded-lg border flex items-center justify-center flex-shrink-0 transition cursor-pointer ${
+                                      currentEval.checked
+                                        ? 'bg-[#10B981] border-[#10B981] text-slate-950'
+                                        : 'bg-slate-900 border-slate-600 text-transparent hover:border-[#00A8E8]'
+                                    }`}
+                                    title="Tandai sudah ditanyakan"
+                                  >
+                                    <Check className="w-4 h-4 stroke-[3]" />
+                                  </button>
+                                  <div>
+                                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#00A8E8]">
+                                      Pertanyaan #{idx + 1}
+                                    </span>
+                                    <h4 className="text-sm sm:text-base font-bold text-white leading-snug mt-0.5">
+                                      “{qItem.question}”
+                                    </h4>
+                                  </div>
+                                </div>
+
+                                {/* Box Indikator Jawaban Ideal */}
+                                <div className="ml-9 bg-[#111C38] border border-slate-800 rounded-xl p-3.5 space-y-1">
+                                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#10B981]">
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>Indikator Jawaban Ideal:</span>
+                                  </div>
+                                  <p className="text-xs text-slate-300 leading-relaxed">
+                                    {qItem.idealAnswerIndicator}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Kanan (5 Kolom): Skor 1-5 & Catatan Singkat HR */}
+                              <div className="lg:col-span-5 bg-[#111C38]/90 border border-slate-800 rounded-xl p-4 flex flex-col justify-between space-y-3">
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-semibold text-slate-300">
+                                      Skor Jawaban Kandidat (1 - 5):
+                                    </span>
+                                    {currentEval.score > 0 && (
+                                      <span className="text-xs font-bold text-[#00A8E8]">
+                                        Skor: {currentEval.score}/5
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Tombol Skor 1 - 5 */}
+                                  <div className="grid grid-cols-5 gap-1.5">
+                                    {[1, 2, 3, 4, 5].map((num) => (
+                                      <button
+                                        key={num}
+                                        type="button"
+                                        onClick={() => {
+                                          updateQuestionEval(evalKey, 'score', num);
+                                          if (!currentEval.checked) {
+                                            updateQuestionEval(evalKey, 'checked', true);
+                                          }
+                                        }}
+                                        className={`py-1.5 rounded-lg text-xs font-bold border transition cursor-pointer ${
+                                          currentEval.score === num
+                                            ? 'bg-[#00A8E8] border-[#00A8E8] text-white shadow'
+                                            : 'bg-[#0B132B] border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white'
+                                        }`}
+                                      >
+                                        {num} ★
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                                    Catatan Jawaban / Observasi Interviewer:
+                                  </label>
+                                  <textarea
+                                    rows={2}
+                                    value={currentEval.note}
+                                    onChange={(e) =>
+                                      updateQuestionEval(evalKey, 'note', e.target.value)
+                                    }
+                                    placeholder="Ketik poin jawaban kandidat atau catatan verifikasi..."
+                                    className="w-full bg-[#0B132B] border border-slate-700 focus:border-[#00A8E8] rounded-lg p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none resize-none"
+                                  />
+                                </div>
+                              </div>
+
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* TAMPILAN LENGKAP SEMUA KATEGORI PERTANYAAN KHUSUS SAAT DICETAK / PDF */}
+              <div className="hidden print-only space-y-6">
+                {INTERVIEW_TABS.map((tabObj) => {
+                  const list = analysisResult.interviewQuestions?.[tabObj.id] || [];
+                  return (
+                    <div key={tabObj.id} className="space-y-3 border-t border-slate-300 pt-4">
+                      <h4 className="text-sm font-bold uppercase text-slate-900">
+                        {tabObj.label}
+                      </h4>
+                      {list.map((qItem, idx) => {
+                        const evalKey = `${tabObj.id}_${idx}`;
+                        const currentEval = interviewEval[evalKey] || {
+                          checked: false,
+                          score: 0,
+                          note: ''
+                        };
+                        return (
+                          <div key={evalKey} className="border border-slate-300 rounded-lg p-3 space-y-1.5 break-inside-avoid">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-slate-900">
+                                [{currentEval.checked ? '✓ Ditanyakan' : 'Belum Ditanyakan'}] Pertanyaan #{idx + 1}
+                              </span>
+                              <span className="text-xs font-bold text-slate-800">
+                                Skor Interview: {currentEval.score > 0 ? `${currentEval.score} / 5` : '- / 5'}
+                              </span>
+                            </div>
+                            <p className="text-xs font-semibold text-slate-900">
+                              “{qItem.question}”
+                            </p>
+                            <p className="text-[11px] text-slate-600">
+                              <strong>Indikator Ideal:</strong> {qItem.idealAnswerIndicator}
+                            </p>
+                            <p className="text-[11px] text-slate-800 bg-slate-100 p-2 rounded">
+                              <strong>Catatan Pewawancara:</strong> {currentEval.note || '(Tidak ada catatan tertulis)'}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
+
+            {/* ==========================================
+                D. KESIMPULAN AKHIR HR & TOMBOL EXPORT LAPORAN PDF
+            ========================================== */}
+            <div className="bg-[#111C38] border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-5 print-card">
+              <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3.5">
+                <ClipboardCheck className="w-5 h-5 text-[#00A8E8]" />
+                <h3 className="text-base font-bold text-white print-text-dark">
+                  Keputusan Akhir & Catatan HR PT Dimensi Jaringan Bersinar
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 print-text-dark">
+                    Nama Pewawancara (HR / User Teknis):
+                  </label>
+                  <input
+                    type="text"
+                    value={interviewerName}
+                    onChange={(e) => handleInterviewerChange(e.target.value)}
+                    placeholder="Contoh: Bpk. Hendra (HRD) / Lead NOC"
+                    className="w-full bg-[#0B132B] border border-slate-700 focus:border-[#00A8E8] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none print-card print-text-dark"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 print-text-dark">
+                    Status Rekomendasi Interview:
+                  </label>
+                  <select
+                    value={interviewRecommendation}
+                    onChange={(e) => setInterviewRecommendation(e.target.value)}
+                    className="w-full bg-[#0B132B] border border-slate-700 focus:border-[#00A8E8] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white font-semibold focus:outline-none print-card print-text-dark"
+                  >
+                    <option value="Direkomendasikan Lanjut / Hire">✅ Direkomendasikan Lanjut / Hire</option>
+                    <option value="Lanjut Uji Praktik Lapangan / Splicing / Mikrotik">🛠️ Lanjut Uji Praktik Lapangan / Teknis</option>
+                    <option value="Dipertimbangkan (Cadangan)">⚠️ Dipertimbangkan (Kandidat Cadangan)</option>
+                    <option value="Belum Sesuai / Ditolak">❌ Belum Sesuai / Tidak Lanjut</option>
+                  </select>
+                </div>
+
+                <div className="bg-[#0B132B] border border-slate-800 rounded-xl p-3 flex flex-col justify-center print-card">
+                  <span className="text-[11px] text-slate-400 print-text-muted">Rekapitulasi Skor Akhir:</span>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs font-bold text-slate-200 print-text-dark">
+                      CV Match: <strong className="text-[#00A8E8]">{analysisResult.matchScore}%</strong>
+                    </span>
+                    <span className="text-xs font-bold text-slate-200 print-text-dark">
+                      Skor Interview: <strong className="text-[#10B981]">{interviewStats.avgScore} / 5.0</strong>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 print-text-dark">
+                  Catatan Kesimpulan HR / Hasil Praktik / Ekspektasi Gaji & Kesiapan Mulai Kerja:
+                </label>
+                <textarea
+                  rows={3}
+                  value={hrSummaryNotes}
+                  onChange={(e) => setHrSummaryNotes(e.target.value)}
+                  placeholder="Tuliskan rangkuman hasil wawancara, ketersediaan mulai kerja, ekspektasi gaji, serta kesiapan ditempatkan di unit upaznet / METARA..."
+                  className="w-full bg-[#0B132B] border border-slate-700 focus:border-[#00A8E8] rounded-xl p-3.5 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none print-card print-text-dark"
+                />
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-slate-800 no-print">
+                <p className="text-xs text-slate-400">
+                  Dokumen ini siap dicetak atau disimpan sebagai PDF untuk arsip rekrutmen <strong>PT Dimensi Jaringan Bersinar</strong>.
+                </p>
+                <button
+                  type="button"
+                  onClick={handlePrintReport}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-[#00A8E8] to-[#10B981] hover:opacity-95 text-slate-950 shadow-lg transition cursor-pointer"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Cetak / Simpan PDF Hasil Screening & Interview</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </main>
+
+      {/* ==========================================
+          FOOTER
+      ========================================== */}
+      <footer className="border-t border-slate-800/80 mt-12 py-6 text-center text-xs text-slate-500 no-print">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p>
+            © {new Date().getFullYear()} <strong className="text-slate-300">PT Dimensi Jaringan Bersinar</strong> — Brand Utama: <strong className="text-[#00A8E8]">upaznet</strong> & Sub-unit Ekspansi: <strong className="text-slate-300">METARA</strong>
+          </p>
+          <p>Upaznet Talent Radar v1.0 • HR Intelligence & Candidate Screening Portal</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
